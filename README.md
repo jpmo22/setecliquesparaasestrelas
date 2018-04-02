@@ -1,5 +1,5 @@
 # Sete Cliques Para As Estrelas
-Repositório para o código em Python do jogo "Sete Cliques para as Estrelas" (por Guga Mafra)
+Repositório para o código em Python do jogo "Sete Cliques para as Estrelas" (por Guga Mafra em https://gugacast.com/)
 
 ## Objetivo
 O código tem como objetivo encontrar um caminho menor que 7 cliques entre as página inicial e a final.
