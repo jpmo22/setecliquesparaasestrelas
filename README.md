@@ -1,12 +1,20 @@
 # Sete Cliques Para As Estrelas
-Repositório para o código em Python do jogo "Sete Cliques para as Estrelas" (por Guga Mafra em https://gugacast.com/)
+(Seven Clicks to the Stars in a loose translation)
+A simple code to beat the fun game called "Sete Cliques para as Estrelas" created by Guga Mafra at [GugaCast](https://gugacast.com/).
 
-## Objetivo
-O código tem como objetivo encontrar um caminho menor que 7 cliques entre as página inicial e a final.
-Este código foi feito apenas para estudo e não deve ser utilizado para nenhum outro propósito além da diversão.
+## Disclaimer
+This code was made only to study [Python](https://www.python.org/) and **most be used only for fun** :+1:.
 
-## Regras do Jogo:
-1. O jogador deve escolher duas páginas distintas da Wikipedia;
-2. Somente páginas da Wikipedia em Português são válidas;
-3. O jogagor tem no máximo 7 cliques para ir da página inicial a página final;
-4. Ganha o jogador que alcançar a páginal final antes dos 7 cliques.
+## Game Goal
+Navigate between two pages on [Wikipedia](https://pt.wikipedia.org/) in seven clicks at the most.
+
+## Game Rules
+1. The player chooses two distinct pages on Wikipedia;
+2. Player clicks at any internal link from initial page;
+3. Player keeps clicking until reach the target page or reach the click limit;
+4. If player want's to go back a page, another click is scored;
+5. Player wins if the target page is found before the 8th click;
+6. Player looses if the target page is not found after the 7th click.
+
+If players wants he can continue after the 7th click and the score must be negative just like Golf. For this code we will never push the limits.
+
