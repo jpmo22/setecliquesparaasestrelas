@@ -131,7 +131,7 @@ def db_list_parents(child_link):
     return parents
 
 
-def execute(source_link, target_link):
+def run(source_link, target_link):
     started_at = datetime.now()
     print('Starting at {}'.format(started_at))
     print('Searching for links between "{}" and "{}" in {}...'
@@ -181,7 +181,7 @@ def execute(source_link, target_link):
         print('Finished in {}'.format(datetime.now() - started_at))
 
 
-_source_link = quote('/wiki/Osvald_Moberg')
-_target_link = quote('/wiki/Ilha')
-
-execute(_source_link, _target_link)
+if __name__ == '__main__':
+    _source_link = quote('/wiki/Osvald_Moberg')
+    _target_link = quote('/wiki/Ilha')
+    run(_source_link, _target_link)
