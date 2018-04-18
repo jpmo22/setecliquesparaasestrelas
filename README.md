@@ -3,7 +3,7 @@
 A simple code to beat the fun game called "Sete Cliques para as Estrelas" created by Guga Mafra at [GugaCast](https://gugacast.com/).
 
 ## Disclaimer
-This code was made only to study [Python](https://www.python.org/) and **most be used only for fun** :+1:.
+This code was made only to study [Python](https://www.python.org/) and **must be used only for fun** :+1:.
 
 ## Game Goal
 Navigate between two pages on [Wikipedia](https://pt.wikipedia.org/) in seven clicks at the most.
