@@ -106,6 +106,15 @@ def db_next_not_read():
         if data is not None else None
 
 
+def get_next_and_set_read():
+    result = db_next_not_read()
+    if result is not None:
+        db_set_read(result.link)
+        db.commit()
+
+    return result
+
+
 def log_track(source_link, links, target_link):
     print('TRACK:')
     print('"{}"'.format(unquote(source_link)))
@@ -131,57 +140,66 @@ def db_list_parents(child_link):
     return parents
 
 
+def check_a_link(source_link, target_link):
+    """ Get a unread link and start crawling. Returns True if the target link is found otherwise returns False. """
+    mylink = get_next_and_set_read()
+
+    if mylink is None:
+        raise EOFError('There is no more links to check')
+
+    print('[level {}] Crawling "{}"... '.format(mylink.level, unquote(mylink.link)), end="", flush=True)
+    links = list_all_links(DEFAULT_URL + mylink.link, target_link)
+    print('{} links found'.format(len(links)))
+
+    if target_link in links:
+        print('RESULT: Found at level', mylink.level + 1)
+        parents = db_list_parents(mylink)
+        log_track(source_link, parents, target_link)
+        return True
+    else:
+        if (mylink.level + 1) < 7:
+            db_insert_all(links, mylink.link, (mylink.level + 1), 0)
+            db.commit()
+
+    return False
+
+
 def run(source_link, target_link):
     started_at = datetime.now()
     print('Starting at {}'.format(started_at))
+
+    check_inputs(source_link, target_link)
     print('Searching for links between "{}" and "{}" in {}...'
           .format(unquote(source_link), unquote(target_link), DEFAULT_URL))
+
+    cur = db.cursor()
     try:
-        if not is_url_valid(DEFAULT_URL + source_link):
-            raise ValueError('RESULT: The source link "{}" is invalid page'.format(unquote(source_link)))
-        if not is_url_valid(DEFAULT_URL + target_link):
-            raise ValueError('RESULT: The target link "{}" is invalid page'.format(unquote(target_link)))
-
-        cur = db.cursor()
         init_db(cur)
-        current_link = source_link
-        found_links = list_all_links(DEFAULT_URL + current_link, target_link)
 
-        # If found target_link in the source_link
-        if target_link in found_links:
-            print('Found at level 0')
-            log_track(source_link, [], target_link)
-            return
-
-        db_insert_all(found_links, None, 1, 0)
+        db_insert(source_link, None, 0, False)
         db.commit()
 
-        next_link = db_next_not_read()
-        while next_link is not None:
-            db_set_read(next_link.link)
-            print('[level {}] Crawling "{}"... '.format(next_link.level, unquote(next_link.link)), end="", flush=True)
-            links = list_all_links(DEFAULT_URL + next_link.link, target_link)
-            print('{} links found'.format(len(links)))
-            if target_link in links:
-                print('RESULT: Found at level', next_link.level + 1)
-                parents = db_list_parents(next_link)
-                log_track(source_link, parents, target_link)
-                return
-            else:
-                if (next_link.level + 1) > 7:
-                    print('RESULT: Not found in 7 levels')
-                    return
+        while not check_a_link(source_link, target_link):
+            pass
 
-                db_insert_all(links, next_link.link, (next_link.level + 1), 0)
-
-            db.commit()
-            next_link = db_next_not_read()
+    except EOFError as e:
+        print('RESULT: Not found in 7 levels: %s' % e)
 
     finally:
+        cur.close()
+        db.close()
         print('Finished in {}'.format(datetime.now() - started_at))
 
 
+def check_inputs(source_link, target_link):
+    """ Checks if the source and target link are valid pages at Wikipedia. If not, a ValueError is raised. """
+    if not is_url_valid(DEFAULT_URL + source_link):
+        raise ValueError('RESULT: The source link "{}" is invalid page'.format(unquote(source_link)))
+    if not is_url_valid(DEFAULT_URL + target_link):
+        raise ValueError('RESULT: The target link "{}" is invalid page'.format(unquote(target_link)))
+
+
 if __name__ == '__main__':
-    _source_link = quote('/wiki/Osvald_Moberg')
-    _target_link = quote('/wiki/Ilha')
+    _source_link = quote('/wiki/Los_Angeles')
+    _target_link = quote('/wiki/Trio_Los_Angeles')
     run(_source_link, _target_link)
