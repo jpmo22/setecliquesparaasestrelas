@@ -12,7 +12,7 @@ Navigate between two pages on [Wikipedia](https://pt.wikipedia.org/) in seven cl
 1. The player chooses two distinct pages on Wikipedia;
 2. Player clicks at any internal link from initial page;
 3. Player keeps clicking until reach the target page or reach the click limit;
-4. If player want's to go back a page, another click is scored;
+4. Player cannot to go back. Once a link is clicked there is no turning back;
 5. Player wins if the target page is found before the 8th click;
 6. Player looses if the target page is not found after the 7th click.
 
