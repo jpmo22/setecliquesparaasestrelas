@@ -1,6 +1,5 @@
 # Sete Cliques Para As Estrelas
-(Seven Clicks to the Stars in a loose translation)
-A simple code to beat the fun game called "Sete Cliques para as Estrelas" created by Guga Mafra at [GugaCast](https://gugacast.com/).
+A simple code to beat the fun game called "Sete Cliques para as Estrelas" (Seven Clicks to the Stars in a loose translation) created by Guga Mafra at [GugaCast](https://gugacast.com/).
 
 ## Disclaimer
 This code was made only to study [Python](https://www.python.org/) and **must be used only for fun** :+1:.
