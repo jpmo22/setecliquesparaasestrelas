@@ -4,7 +4,9 @@ from urllib.error import HTTPError
 from urllib.parse import quote, unquote
 from sqlite3 import connect
 from datetime import datetime
+import logging
 
+log = logging.getLogger(__name__)
 
 # Creates a database
 db = connect(':memory:')
@@ -15,6 +17,19 @@ DB_COL_PARENT_LINK = 1
 DB_COL_LEVEL = 2
 DB_COL_IS_READ = 3
 DEFAULT_URL = 'https://pt.wikipedia.org'
+
+
+log.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
+
+file_handler = logging.FileHandler('setecliques.log')
+file_handler.setFormatter(formatter)
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+log.addHandler(file_handler)
+log.addHandler(stream_handler)
 
 
 class Link(object):
@@ -36,8 +51,7 @@ def init_db(cur):
 
 def is_internal_link(tag):
     """ Removes all external links and anchors """
-    return tag.name == 'a' and tag.has_attr('href') and tag.get('href').startswith('/wiki/') and tag.get('href').\
-        find(':') == -1 and tag.get('href').find('#') == -1
+    return tag.name == 'a' and tag.has_attr('href') and tag.get('href').startswith('/wiki/') and tag.get('href').find(':') == -1 and tag.get('href').find('#') == -1
 
 
 def list_all_links(url, target_link):
@@ -80,7 +94,8 @@ def db_set_read(link):
     if not isinstance(link, str) and not isinstance(link, Link):
         raise TypeError('The db_set_read function must receive str or Link')
 
-    db.cursor().execute('UPDATE link_table SET is_read = 1 WHERE link = ?', (link,) if isinstance(link, str) else (link.link,))
+    db.cursor().execute('UPDATE link_table SET is_read = 1 WHERE link = ?',
+                        (link,) if isinstance(link, str) else (link.link,))
 
 
 def db_get_parent(link):
@@ -116,15 +131,15 @@ def get_next_and_set_read():
 
 
 def log_track(source_link, links, target_link):
-    print('TRACK:')
-    print('"{}"'.format(unquote(source_link)))
+    log.info('TRACK:')
+    log.info('%r', unquote(source_link))
     i = 0
     for link in links:
         i += 1
-        print('\t' * i, '"{}"'.format(unquote(link)))
+        log.info('%s%r', '\t' * i, unquote(link))
 
     i += 1
-    print('\t' * i, '"{}"'.format(unquote(target_link)))
+    log.info('%s%r', '\t' * i, unquote(target_link))
 
 
 def db_list_parents(child_link):
@@ -147,12 +162,11 @@ def check_a_link(source_link, target_link):
     if mylink is None:
         raise EOFError('There is no more links to check')
 
-    print('[level {}] Crawling "{}"... '.format(mylink.level, unquote(mylink.link)), end="", flush=True)
     links = list_all_links(DEFAULT_URL + mylink.link, target_link)
-    print('{} links found'.format(len(links)))
+    log.debug('[level %d] Crawling %r... %d links found', mylink.level, unquote(mylink.link), len(links))
 
     if target_link in links:
-        print('RESULT: Found at level', mylink.level + 1)
+        log.info('RESULT: Found at level %d', mylink.level + 1)
         parents = db_list_parents(mylink)
         log_track(source_link, parents, target_link)
         return True
@@ -166,11 +180,11 @@ def check_a_link(source_link, target_link):
 
 def run(source_link, target_link):
     started_at = datetime.now()
-    print('Starting at {}'.format(started_at))
+    log.info('Starting at %s', started_at)
 
     check_inputs(source_link, target_link)
-    print('Searching for links between "{}" and "{}" in {}...'
-          .format(unquote(source_link), unquote(target_link), DEFAULT_URL))
+    log.info('Searching for links between %r and %r in %s...',
+             unquote(source_link), unquote(target_link), DEFAULT_URL)
 
     cur = db.cursor()
     try:
@@ -183,12 +197,12 @@ def run(source_link, target_link):
             pass
 
     except EOFError as e:
-        print('RESULT: Not found in 7 levels: %s' % e)
+        log.info('RESULT: Not found in 7 levels: %s', e)
 
     finally:
         cur.close()
         db.close()
-        print('Finished in {}'.format(datetime.now() - started_at))
+        log.info('Finished in %s', datetime.now() - started_at)
 
 
 def check_inputs(source_link, target_link):
@@ -200,6 +214,6 @@ def check_inputs(source_link, target_link):
 
 
 if __name__ == '__main__':
-    _source_link = quote('/wiki/Los_Angeles')
-    _target_link = quote('/wiki/Trio_Los_Angeles')
+    _source_link = quote('/wiki/Osvald_Moberg')
+    _target_link = quote('/wiki/Ilha')
     run(_source_link, _target_link)
